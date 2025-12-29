@@ -1,0 +1,194 @@
+#!/bin/bash
+# ==================================================
+# YUBBI2 — ULTRA OSINT FRAMEWORK
+# ==================================================
+
+BASE="$HOME/.toolsyubbi2"
+BANNER="$BASE/banner.txt"
+OUT="$BASE/output"
+
+mkdir -p "$OUT"/{fullscan,subdomain,parameters,nmap,social}
+
+# ===== WARNA =====
+B="\033[1;34m"; C="\033[1;36m"; G="\033[1;32m"
+Y="\033[1;33m"; R="\033[1;31m"; W="\033[1;37m"
+N="\033[0m"
+
+line(){ echo -e "${B}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${N}"; }
+
+box(){
+echo -e "${B}┌────────────────────────────────────────────────┐${N}"
+printf "${B}│${W} %-46s ${B}│${N}\n" "$1"
+echo -e "${B}└────────────────────────────────────────────────┘${N}"
+}
+
+banner(){
+clear
+echo -e "$B"
+[ -f "$BANNER" ] && cat "$BANNER" || echo "YUBBI2 OSINT FRAMEWORK"
+echo -e "$N"
+}
+
+pause(){ read -rp "Tekan ENTER untuk kembali..."; }
+
+detect(){
+[[ "$1" =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}$ ]] && echo "IP" || echo "DOMAIN"
+}
+
+ts(){ date +"%Y-%m-%d %H:%M:%S"; }
+
+# ================= MODULE =================
+
+whois_domain(){ box "WHOIS DOMAIN"; whois "$1"; }
+whois_ip(){ box "WHOIS IP"; whois "$1"; }
+
+dns_lookup(){
+box "DNS RECORD"
+dig "$1" ANY +noall +answer
+}
+
+registrar_info(){
+box "REGISTRAR & STATUS"
+whois "$1" | grep -Ei "Registrar|Creation|Updated|Expiry|Status|Name Server"
+}
+
+asn_info(){
+box "ASN / NETWORK"
+whois "$1" | grep -Ei "origin|aut-num|route|CIDR|ASN"
+}
+
+# ================= SUBDOMAIN =================
+
+subdomain_enum(){
+box "SUBDOMAIN ENUMERATION"
+out="$OUT/subdomain/$1.txt"
+: > "$out"
+
+command -v subfinder >/dev/null && subfinder -d "$1" -silent >> "$out"
+command -v assetfinder >/dev/null && assetfinder --subs-only "$1" >> "$out"
+command -v amass >/dev/null && amass enum -passive -d "$1" >> "$out"
+
+sort -u "$out" -o "$out"
+echo -e "${G}✔ Output:${N} $out"
+}
+
+# ================= PARAMETER =================
+
+param_enum(){
+box "PARAMETER DISCOVERY"
+out="$OUT/parameters/$1.txt"
+: > "$out"
+
+command -v gau >/dev/null && gau "$1" | grep "=" >> "$out"
+command -v waybackurls >/dev/null && waybackurls "$1" | grep "=" >> "$out"
+
+sort -u "$out" -o "$out"
+echo -e "${G}✔ Output:${N} $out"
+}
+
+# ================= NMAP =================
+
+nmap_scan(){
+box "NMAP BASIC SCAN"
+out="$OUT/nmap/$1.txt"
+nmap -sS -sV -Pn -T4 "$1" | tee "$out"
+}
+
+# ================= SOCIAL =================
+
+social_scan(){
+read -rp "Username: " u
+out="$OUT/social/$u.txt"
+
+box "SOCIAL MEDIA OSINT"
+{
+echo "USERNAME : $u"
+echo "TIME     : $(ts)"
+line
+} | tee "$out"
+
+sites=(
+"https://www.instagram.com/$u"
+"https://www.tiktok.com/@$u"
+"https://github.com/$u"
+"https://gitlab.com/$u"
+"https://t.me/$u"
+"https://x.com/$u"
+"https://www.facebook.com/$u"
+"https://www.reddit.com/user/$u"
+"https://medium.com/@$u"
+)
+
+for s in "${sites[@]}"; do
+code=$(curl -s -o /dev/null -w "%{http_code}" "$s")
+[ "$code" = "200" ] && echo "[FOUND] $s" || echo "[---- ] $s"
+done | tee -a "$out"
+
+echo -e "${G}✔ Output:${N} $out"
+}
+
+# ================= FULL SCAN =================
+
+full_scan(){
+read -rp "Target (domain / IP): " t
+type=$(detect "$t")
+file="$OUT/fullscan/${t}_$(date +%F_%H%M%S).txt"
+
+{
+box "TARGET SUMMARY"
+echo "Target : $t"
+echo "Type   : $type"
+echo "Time   : $(ts)"
+line
+
+if [ "$type" = "DOMAIN" ]; then
+whois_domain "$t"
+dns_lookup "$t"
+registrar_info "$t"
+subdomain_enum "$t"
+param_enum "$t"
+fi
+
+whois_ip "$t"
+asn_info "$t"
+nmap_scan "$t"
+
+} | tee "$file"
+
+echo -e "${G}✔ FULL SCAN SELESAI${N}"
+echo -e "${G}✔ Output:${N} $file"
+}
+
+# ================= MENU =================
+
+menu(){
+line
+echo -e "${G}[1]${W} WHOIS Domain"
+echo -e "${G}[2]${W} WHOIS IP"
+echo -e "${G}[3]${W} DNS Lookup"
+echo -e "${G}[4]${W} Registrar & Status"
+echo -e "${G}[5]${W} Subdomain Enumeration"
+echo -e "${G}[6]${W} Parameter Discovery"
+echo -e "${G}[7]${W} Social Media OSINT"
+echo -e "${Y}[8]${W} FULL OSINT SCAN"
+echo -e "${R}[0]${W} Keluar"
+line
+}
+
+while true; do
+banner
+menu
+read -rp "Pilih menu: " p
+case $p in
+1) read -rp "Domain: " x; whois_domain "$x"; pause ;;
+2) read -rp "IP: " x; whois_ip "$x"; pause ;;
+3) read -rp "Domain: " x; dns_lookup "$x"; pause ;;
+4) read -rp "Domain: " x; registrar_info "$x"; pause ;;
+5) read -rp "Domain: " x; subdomain_enum "$x"; pause ;;
+6) read -rp "Domain: " x; param_enum "$x"; pause ;;
+7) social_scan; pause ;;
+8) full_scan; pause ;;
+0) exit ;;
+*) echo -e "${R}Pilihan tidak valid${N}"; sleep 1 ;;
+esac
+done
