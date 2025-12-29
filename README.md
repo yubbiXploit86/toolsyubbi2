@@ -61,6 +61,7 @@ Satu target → **SEMUA modul berjalan otomatis**
 Hasil lengkap dalam satu file laporan.
 
 ---
+## ✦ ‼️LINUX ONLY "DEBIAN UBUNTU KALI LINUX‼️ ✦ 
 ## ✦ MENJALANKAN TOOLS cukup ketik toolsyubbi2 
 ## ✦ INSTALASI
 
