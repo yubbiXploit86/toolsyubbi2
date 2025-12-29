@@ -61,8 +61,9 @@ Satu target → **SEMUA modul berjalan otomatis**
 Hasil lengkap dalam satu file laporan.
 
 ---
-## ✦ ‼️LINUX ONLY "DEBIAN UBUNTU KALI LINUX‼️ ✦ 
-## ✦ MENJALANKAN TOOLS cukup ketik toolsyubbi2 
+## ✦ ‼️LINUX ONLY SUPPORT ✦
+## "DEBIAN UBUNTU KALI LINUX" 
+
 ## ✦ INSTALASI
 
 ### 1️⃣ Clone Repository
@@ -71,3 +72,5 @@ git clone https://github.com/yubbiXploit86/toolsyubbi2.git
 cd toolsyubbi2
 chmod +x install.sh
 ./install.sh
+```
+## ✦ MENJALANKAN TOOLS cukup ketik toolsyubbi2 
