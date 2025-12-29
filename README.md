@@ -61,7 +61,7 @@ Satu target → **SEMUA modul berjalan otomatis**
 Hasil lengkap dalam satu file laporan.
 
 ---
-## ✦ ‼️LINUX ONLY SUPPORT ✦
+## ✦ ‼️ SUPPORT LINUX ONLY✦
 ## "DEBIAN UBUNTU KALI LINUX" 
 
 ## ✦ INSTALASI
@@ -74,3 +74,4 @@ chmod +x install.sh
 ./install.sh
 ```
 ## ✦ MENJALANKAN TOOLS cukup ketik toolsyubbi2 
+
