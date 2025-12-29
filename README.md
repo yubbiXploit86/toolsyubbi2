@@ -66,7 +66,7 @@ Hasil lengkap dalam satu file laporan.
 
 ### 1️⃣ Clone Repository
 ```bash
-git clone https://github.com/USERNAME/toolsyubbi2.git
+git clone https://github.com/yubbiXploit86/toolsyubbi2.git
 cd toolsyubbi2
 chmod +x install.sh
 ./install.sh
